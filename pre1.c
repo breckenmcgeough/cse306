@@ -14,30 +14,23 @@ int main(int argc, char* argv[]) {
 
   if (argc > 2){
     int h = 0;
-    for (int i = 1; i < argc-1; i++){
-      if (argv[i][0] == '-' && argv[i][1] == 'r'){
+    for (int i = 1; i < argc-1; i++) { //loop through all arguments and check for '-h' and set h to 1 if there is a '-h'
+      if (argv[i][0] == '-' && argv[i][1] == 'h') {
+        h = 1;
+      }
+    }
+    for (int i = 1; i < argc-1; i++){ // loop through all the arguments
+      if (argv[i][0] == '-' && argv[i][1] == 'r'){ // check for '-r'
         if (h == 1){
-          printf("%d\n", dash_r(input_file)-1);
+          printf("%d\n", dash_r(input_file)-1); // subtract 1 to account for header line if '-h' was present
         }else{
-          for (int j = i+1; j < argc-1; j++){
-            if (argv[j][0] == '-' && argv[j][1] == 'h'){
-              h = 1;
-            }
-          }
-          if (h == 1){
-            printf("%d\n", dash_r(input_file)-1);
-          }else{
             printf("%d\n", dash_r(input_file));
           }
         }
         input_file = file_contents(argv[argc-1]);
-      }
       if (argv[i][0] == '-' && argv[i][1] == 'f'){
         printf("%d\n", dash_f(input_file));
         input_file = file_contents(argv[argc-1]);
-      }
-      if (argv[i][0] == '-' && argv[i][1] == 'h'){
-        h = 1;
       }
     }
   }else{
