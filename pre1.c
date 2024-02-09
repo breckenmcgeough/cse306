@@ -23,39 +23,53 @@ int main(int argc, char* argv[]) {
         h = 1;
       }
     }
+
+    
     for (int i = 1; i < argc-1; i++){ // loop through all the arguments
-      if (argv[i][0] == '-' && argv[i][1] == 'r'){ // check for '-r'
+
+
+      if (argv[i] == "-r"){ // check for '-r'
         if (h == 1){
           printf("%d\n", dash_r(input_file)-1); // subtract 1 to account for header line if '-h' was present
         }else{
             printf("%d\n", dash_r(input_file));
           }
         }
+
+
         input_file = file_contents(argv[argc-1]);
-      if (argv[i][0] == '-' && argv[i][1] == 'f'){
+      if (argv[i] == "-f"){
         printf("%d\n", dash_f(input_file));
         input_file = file_contents(argv[argc-1]);
       }
-      if (argv[i][0] == '-' && argv[i][1] == 'm' && argv[i][2] == 'i' && argv[i][3] == 'n'){
+
+
+      if (argv[i] == "-min"){
         char* field = argv[i+1];
         float min = dash_minmaxmean(input_file, field, argv[argc-1],1);
         printf("%f\n", min);
         i += 1;
       }
-      if (argv[i][0] == '-' && argv[i][1] == 'm' && argv[i][2] == 'a' && argv[i][3] == 'x'){
+
+
+      if (argv[i] == "-max") {
         char* field = argv[i+1];
         float max = dash_minmaxmean(input_file, field, argv[argc-1],2);
         printf("%f\n", max);
         input_file = file_contents(argv[argc-1]);
         i += 1;
       }
-      if (argv[i][0] == '-' && argv[i][1] == 'm' && argv[i][2] == 'e' && argv[i][3] == 'a' && argv[i][4] == 'n'){
+
+
+      if (argv[i] == "-mean"){
         char* field = argv[i+1];
         float mean = dash_minmaxmean(input_file, field, argv[argc-1],3);
         printf("%f\n", mean);
         input_file = file_contents(argv[argc-1]);
         i += 1;
       }
+
+
     }
   }else{
     return EXIT_FAILURE;
@@ -75,6 +89,7 @@ FILE* file_contents(char* filename) {
   return file;
 }
 
+//Gets the amount of Datapoints in the csv file
 int dash_f(FILE* file){
   int count = 0;
   char c;
@@ -87,6 +102,7 @@ int dash_f(FILE* file){
   return count+1;
 }
 
+//Gets the amount of Lines in the csv file
 int dash_r(FILE* file){
   int count = 0;
   char c;
@@ -102,6 +118,7 @@ int dash_r(FILE* file){
 void get_columns(FILE* file, char* filename, char** columns_list){
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
+
 
   char* str = (char*)malloc(sizeof(char)*1000);
   fgets(str, 100, file);
