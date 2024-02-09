@@ -115,17 +115,21 @@ int dash_r(FILE* file){
   return count;
 }
 
+
+/* 
+Given the file, filename, and a place to place the result
+Put a matrix that contains the strings seperated by ',' inside of columns list
+*/
 void get_columns(FILE* file, char* filename, char** columns_list){
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
-
+  //Copy the list
   char* str = (char*)malloc(sizeof(char)*1000);
   fgets(str, 100, file);
   char* token = strtok(str, ",");
 
-  //char** columns_list = (char**)malloc(sizeof(char*)*num_columns);
-
+  
   for(int i = 0; i < num_columns; i++){
     strcpy(columns_list[i], token);
     token = strtok(NULL, ",");
