@@ -9,6 +9,8 @@ int dash_r(FILE* file);
 void get_columns(FILE* file, char* filename, char** columns_list);
 char* get_column_value(char* field, char* str, char** columns_list);
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type);
+void findField(FILE* file, char* filename, int field);
+void dash_h_determiner(FILE* file, char* filename, int type);
 
 
 int main(int argc, char* argv[]) {
@@ -36,47 +38,35 @@ int main(int argc, char* argv[]) {
           }
         }
 
-
         input_file = file_contents(argv[argc-1]);
+
       if (argv[i] == "-f"){
         printf("%d\n", dash_f(input_file));
         input_file = file_contents(argv[argc-1]);
       }
 
-
+      //This obtains the minimum value
       if (argv[i] == "-min"){
-        char* field = argv[i+1];
-        float min = dash_minmaxmean(input_file, field, argv[argc-1],1);
-        printf("%f\n", min);
-        i += 1;
+        dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,1);
       }
 
-
+      //This obtains the maximum value
       if (argv[i] == "-max") {
-        char* field = argv[i+1];
-        float max = dash_minmaxmean(input_file, field, argv[argc-1],2);
-        printf("%f\n", max);
-        input_file = file_contents(argv[argc-1]);
-        i += 1;
+        dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,2);
       }
 
-
+      //This obtains the mean value
       if (argv[i] == "-mean"){
-        char* field = argv[i+1];
-        float mean = dash_minmaxmean(input_file, field, argv[argc-1],3);
-        printf("%f\n", mean);
-        input_file = file_contents(argv[argc-1]);
-        i += 1;
+        dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,3);
       }
-
-
     }
-  }else{
+  }
+  
+  else {
     return EXIT_FAILURE;
   }
 
   fclose(input_file);
-
   return EXIT_SUCCESS;
 }
 
@@ -87,6 +77,52 @@ FILE* file_contents(char* filename) {
     return NULL;
   }
   return file;
+}
+
+void dash_h_determiner(FILE* input_file, char* filename,char* argv,int argc,int i,int h,int type){
+  char* field = argv[i+1];
+        float max;
+        /*
+          If h is 0:
+            If field == '0' or '-' or its the last value than look at first column
+            If atoi can return a number look at that column
+          If h is 1:
+            Just look at the column labeled that
+          Otherwise:
+            Exit with a failure
+        */
+        if (field[0] == '0' || field[0] == '-' || (i + 1 >= argc) && h == 0) {
+          //Find the header given position and get the min  
+          char* label;
+          findField(input_file,argv[argc-1],0,label); 
+          max = dash_minmaxmean(input_file, label, argv[argc-1],type);
+        }
+
+        else if (atoi(argv[i+1]) != 0 && h == 0) {
+          int lookUp = atoi(argv[i+1]);
+          int datapoints = dash_f(input_file);
+          char* label;
+
+          //If inputted number is larger than amount of datapoints, exit with failure
+          if (lookUp >= datapoints){
+            printf("Invalid Column, Datapoints: %d, Entered: %d", datapoints,lookUp);
+            exit(EXIT_FAILURE);
+          }
+
+          //Find the header given position and get the min  
+          findField(input_file,argv[argc-1],lookUp,label); 
+          max = dash_minmaxmean(input_file, label, argv[argc-1],type);
+        }
+        else if (h == 1){
+          //If h == 1 than use topic
+          max = dash_minmaxmean(input_file, field, argv[argc-1],type);
+          }
+        else {
+          //If none of the above, exit with error
+          print("Invalid Column Identifier");
+          exit(EXIT_FAILURE);
+        }
+      printf("%f\n", max);
 }
 
 //Gets the amount of Datapoints in the csv file
@@ -138,6 +174,12 @@ void get_columns(FILE* file, char* filename, char** columns_list){
   fclose(file);
 }
 
+//Using get_columns and the field number, return the Data type associated with the number (field)
+void findField(FILE* file, char* filename, int field, char* result){
+  char **tempList;
+  get_columns(file,filename,tempList);
+  result = strcpy(result,tempList[0][field]);
+}
 
 char* get_column_value(char* field, char* str, char** columns_list){
   int index = 0;
