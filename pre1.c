@@ -129,7 +129,7 @@ void get_columns(FILE* file, char* filename, char** columns_list){
   fgets(str, 100, file);
   char* token = strtok(str, ",");
 
-  
+
   for(int i = 0; i < num_columns; i++){
     strcpy(columns_list[i], token);
     token = strtok(NULL, ",");
