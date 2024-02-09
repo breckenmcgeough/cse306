@@ -9,8 +9,8 @@ int dash_r(FILE* file);
 void get_columns(FILE* file, char* filename, char** columns_list);
 char* get_column_value(char* field, char* str, char** columns_list);
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type);
-void findField(FILE* file, char* filename, int field);
-void dash_h_determiner(FILE* file, char* filename, int type);
+void findField(FILE* file, char* filename, int field, char* result);
+void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type);
 
 
 int main(int argc, char* argv[]) {
@@ -20,26 +20,29 @@ int main(int argc, char* argv[]) {
 
   if (argc > 2){
     int h = 0;
-    for (int i = 1; i < argc-1; i++) { //loop through all arguments and check for '-h' and set h to 1 if there is a '-h'
-      if (argv[i][0] == '-' && argv[i][1] == 'h') {
+
+    //Check if there is -h in the list
+    for (int i = 1; i < argc-1; i++) { 
+      if (argv[i] == "-h") {
         h = 1;
       }
     }
 
-    
-    for (int i = 1; i < argc-1; i++){ // loop through all the arguments
+    //For each arguement in argv  
+    for (int i = 1; i < argc-1; i++){ 
+      //Get file content
+      input_file = file_contents(argv[argc-1]);
 
-
-      if (argv[i] == "-r"){ // check for '-r'
+      //If -r occurs and there is -h subtract by one otherwise print result
+      if (argv[i] == "-r"){ 
         if (h == 1){
-          printf("%d\n", dash_r(input_file)-1); // subtract 1 to account for header line if '-h' was present
+          printf("%d\n", dash_r(input_file)-1); 
         }else{
             printf("%d\n", dash_r(input_file));
           }
         }
 
-        input_file = file_contents(argv[argc-1]);
-
+      //If -f than just call dash_f
       if (argv[i] == "-f"){
         printf("%d\n", dash_f(input_file));
         input_file = file_contents(argv[argc-1]);
@@ -61,7 +64,6 @@ int main(int argc, char* argv[]) {
       }
     }
   }
-  
   else {
     return EXIT_FAILURE;
   }
@@ -79,7 +81,14 @@ FILE* file_contents(char* filename) {
   return file;
 }
 
-void dash_h_determiner(FILE* input_file, char* filename,char* argv,int argc,int i,int h,int type){
+//Using get_columns and the field number, return the Data type associated with the number (field)
+void findField(FILE* file, char* filename, int field, char* result){
+  char **tempList;
+  get_columns(file,filename,tempList);
+  result = strcpy(result,((char*)tempList[field]));
+}
+
+void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type){
   char* field = argv[i+1];
         float max;
         /*
@@ -119,7 +128,7 @@ void dash_h_determiner(FILE* input_file, char* filename,char* argv,int argc,int 
           }
         else {
           //If none of the above, exit with error
-          print("Invalid Column Identifier");
+          printf("Invalid Column Identifier");
           exit(EXIT_FAILURE);
         }
       printf("%f\n", max);
@@ -174,12 +183,6 @@ void get_columns(FILE* file, char* filename, char** columns_list){
   fclose(file);
 }
 
-//Using get_columns and the field number, return the Data type associated with the number (field)
-void findField(FILE* file, char* filename, int field, char* result){
-  char **tempList;
-  get_columns(file,filename,tempList);
-  result = strcpy(result,tempList[0][field]);
-}
 
 char* get_column_value(char* field, char* str, char** columns_list){
   int index = 0;
