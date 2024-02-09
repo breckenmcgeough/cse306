@@ -17,13 +17,12 @@ int main(int argc, char* argv[]) {
 
   FILE* input_file = file_contents(argv[argc-1]);
 
-
   if (argc > 2){
     int h = 0;
 
     //Check if there is -h in the list
     for (int i = 1; i < argc-1; i++) { 
-      if (argv[i] == "-h") {
+      if (argv[i][0] == '-' && argv[i][1] == 'h') {
         h = 1;
       }
     }
@@ -34,7 +33,7 @@ int main(int argc, char* argv[]) {
       input_file = file_contents(argv[argc-1]);
 
       //If -r occurs and there is -h subtract by one otherwise print result
-      if (argv[i] == "-r"){ 
+      if (argv[i][0] == '-' && argv[i][1] == 'r'){ 
         if (h == 1){
           printf("%d\n", dash_r(input_file)-1); 
         }else{
@@ -43,23 +42,23 @@ int main(int argc, char* argv[]) {
         }
 
       //If -f than just call dash_f
-      if (argv[i] == "-f"){
+      if (argv[i][0] == '-' && argv[i][1] == 'f'){
         printf("%d\n", dash_f(input_file));
         input_file = file_contents(argv[argc-1]);
       }
 
       //This obtains the minimum value
-      if (argv[i] == "-min"){
+      if (argv[i][0] == '-' && argv[i][1] == 'm'&& argv[i][2] == 'i'  && argv[i][3] == 'n'){
         dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,1);
       }
 
       //This obtains the maximum value
-      if (argv[i] == "-max") {
+      if (argv[i][0] == '-' && argv[i][1] == 'm'&& argv[i][2] == 'a'  && argv[i][3] == 'x') {
         dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,2);
       }
 
       //This obtains the mean value
-      if (argv[i] == "-mean"){
+      if (argv[i][0] == '-' && argv[i][1] == 'm'&& argv[i][2] == 'e'  && argv[i][3] == 'a' && argv[i][4] == 'n'){
         dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,3);
       }
     }
@@ -83,9 +82,15 @@ FILE* file_contents(char* filename) {
 
 //Using get_columns and the field number, return the Data type associated with the number (field)
 void findField(FILE* file, char* filename, int field, char* result){
-  char **tempList;
-  get_columns(file,filename,tempList);
-  result = strcpy(result,((char*)tempList[field]));
+  int num_columns = dash_f(file);
+  char** tempList = (char**)malloc(sizeof(char*)*num_columns);
+
+  for (int i = 0; i < num_columns; i++){
+    tempList[i] = (char*)malloc(sizeof(char)*100);
+  }
+  get_columns(file_contents(filename),filename,tempList);
+  result = strcpy(result,tempList[field]);
+  free(tempList);
 }
 
 void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type){
@@ -100,18 +105,25 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
           Otherwise:
             Exit with a failure
         */
-        if (field[0] == '0' || field[0] == '-' || (i + 1 >= argc) && h == 0) {
+        printf("Type: %d\n",type);
+        printf("\tH: %d\n",h);
+        printf("\tField: %s\n",field);
+        //If h == 0 and the start of the argv starts with 0, -, or its the end of the file than it should be default value
+        if (h == 0 && (field[0] == '0' || (field[0] == '-') || !(i+1 >= argc)) ) {
           //Find the header given position and get the min  
           char* label;
-          findField(input_file,argv[argc-1],0,label); 
+          label = (char*)malloc(sizeof(char) * 100);
+          findField(file_contents(filename),argv[argc-1],0,label);
+          printf("\tLabel: %s\n",label);
           max = dash_minmaxmean(input_file, label, argv[argc-1],type);
+          free(label);
         }
 
-        else if (atoi(argv[i+1]) != 0 && h == 0) {
+        else if (h == 0 && atoi(argv[i+1]) != 0) {
           int lookUp = atoi(argv[i+1]);
           int datapoints = dash_f(input_file);
           char* label;
-
+          label = (char*)malloc(sizeof(char) * 100);
           //If inputted number is larger than amount of datapoints, exit with failure
           if (lookUp >= datapoints){
             printf("Invalid Column, Datapoints: %d, Entered: %d", datapoints,lookUp);
@@ -119,16 +131,17 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
           }
 
           //Find the header given position and get the min  
-          findField(input_file,argv[argc-1],lookUp,label); 
+          findField(file_contents(filename),argv[argc-1],lookUp,label);
           max = dash_minmaxmean(input_file, label, argv[argc-1],type);
+          free(label);
         }
         else if (h == 1){
           //If h == 1 than use topic
-          max = dash_minmaxmean(input_file, field, argv[argc-1],type);
+          max = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type);
           }
         else {
           //If none of the above, exit with error
-          printf("Invalid Column Identifier");
+          printf("Invalid Column Identifier\n");
           exit(EXIT_FAILURE);
         }
       printf("%f\n", max);
@@ -160,7 +173,6 @@ int dash_r(FILE* file){
   return count;
 }
 
-
 /* 
 Given the file, filename, and a place to place the result
 Put a matrix that contains the strings seperated by ',' inside of columns list
@@ -174,11 +186,11 @@ void get_columns(FILE* file, char* filename, char** columns_list){
   fgets(str, 100, file);
   char* token = strtok(str, ",");
 
-
   for(int i = 0; i < num_columns; i++){
     strcpy(columns_list[i], token);
     token = strtok(NULL, ",");
   }
+
   free(str);
   fclose(file);
 }
