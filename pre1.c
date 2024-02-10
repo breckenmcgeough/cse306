@@ -89,7 +89,7 @@ void findField(FILE* file, char* filename, int field, char* result){
     tempList[i] = (char*)malloc(sizeof(char)*100);
   }
   get_columns(file_contents(filename),filename,tempList);
-  result = strcpy(result,tempList[field]);
+  result = (char*)strcpy(result,tempList[field]);
   free(tempList);
 }
 
@@ -109,34 +109,42 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
         printf("\tH: %d\n",h);
         printf("\tField: %s\n",field);
         //If h == 0 and the start of the argv starts with 0, -, or its the end of the file than it should be default value
-        if (h == 0 && (field[0] == '0' || (field[0] == '-') || !(i+1 >= argc)) ) {
+        if (h == 0 && (field[0] == '0' || (field[0] == '-') && (i+1 < argc)) ) {
           //Find the header given position and get the min  
-          char* label;
-          label = (char*)malloc(sizeof(char) * 100);
+          char* label = (char*)malloc(sizeof(char) * 100);
           findField(file_contents(filename),argv[argc-1],0,label);
+          printf("\tDefaultField\n");
           printf("\tLabel: %s\n",label);
-          max = dash_minmaxmean(input_file, label, argv[argc-1],type);
+          max = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
           free(label);
         }
 
         else if (h == 0 && atoi(argv[i+1]) != 0) {
           int lookUp = atoi(argv[i+1]);
           int datapoints = dash_f(input_file);
-          char* label;
-          label = (char*)malloc(sizeof(char) * 100);
+          char* label = (char*)malloc(sizeof(char) * 100);
           //If inputted number is larger than amount of datapoints, exit with failure
           if (lookUp >= datapoints){
             printf("Invalid Column, Datapoints: %d, Entered: %d", datapoints,lookUp);
             exit(EXIT_FAILURE);
           }
 
-          //Find the header given position and get the min  
+
+
+
           findField(file_contents(filename),argv[argc-1],lookUp,label);
-          max = dash_minmaxmean(input_file, label, argv[argc-1],type);
+          max = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
+
+          //Find the header given position and get the min
+          printf("\tAtoiField\n");
+          printf("\tAtoi: %d\n",lookUp);
+          printf("\tLabel: %s\n",label);
+
           free(label);
         }
         else if (h == 1){
           //If h == 1 than use topic
+          printf("\tHField\n");  
           max = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type);
           }
         else {
