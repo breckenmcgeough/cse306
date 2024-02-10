@@ -211,7 +211,7 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
   float count = 0;
   while(fgets(str, MAXCHAR, file) != NULL){ //iterate through the rows until none left
     char* value = get_column_value(field_invar, str, columns_list); //get the value at the field (column) in the current row
-    float num = atoi(value); //convert the string to a float
+    float num = atof(value); //convert the string to a float
     if (num < min){
       min = num;
     }
