@@ -106,7 +106,7 @@ void get_columns(FILE* file, char* filename, char** columns_list){ //this functi
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
-  char* str = (char*)malloc(sizeof(char)*1000);
+  char* str = (char*)malloc(sizeof(char)*800);
   fgets(str, 100, file);
   char* token = strtok(str, ",");
 
@@ -127,7 +127,7 @@ char* get_column_value(char* field, char* str, char** columns_list){ //this func
   while (str[j] != '\n'){ //iterate through the row character by character
     if (strcmp(columns_list[index], field) == 0){ //if the inputted field matches the column name at the 'index' index
       int k = j;
-      char* value = (char*)malloc(sizeof(char)*50);
+      char* value = (char*)malloc(sizeof(char)*20);
       while(str[k] != ','){ //iterate through chars until a comma is found and construct the string stored at that column in the row
         value[k-j] = str[k];
         k++;
@@ -147,7 +147,7 @@ char* get_column_value(char* field, char* str, char** columns_list){ //this func
       }
       if (m == 1){
         int k = j;
-        char* value = (char*)malloc(sizeof(char)*50);
+        char* value = (char*)malloc(sizeof(char)*30);
         while(str[k] != '\n'){
           value[k-j] = str[k];
           k++;
@@ -174,7 +174,7 @@ char* get_column_value(char* field, char* str, char** columns_list){ //this func
 
 void initialize_array(char** columns_list, int num_columns){
   for (int i = 0; i < num_columns; i++){ //allocate memory for each column name (string) in the array of strings
-    columns_list[i] = (char*)malloc(sizeof(char)*100);
+    columns_list[i] = (char*)malloc(sizeof(char)*50);
   }
 }
 
@@ -190,10 +190,10 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
 
   file = fopen(filename,"r"); //have to keep opening and closing the file since the other functions mess up the file by analyzing it
 
-  char* str = (char*)malloc(sizeof(char)*10000);
+  char* str = (char*)malloc(sizeof(char)*1000);
   fgets(str, MAXCHAR, file); 
 
-  char* field_invar = (char*)malloc(sizeof(char)*50);
+  char* field_invar = (char*)malloc(sizeof(char)*30);
   strcpy(field_invar, field); //copy the field into field_invar which is an invariant version of the field 
 
   //fgets(str, MAXCHAR, file);
