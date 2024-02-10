@@ -95,7 +95,7 @@ void findField(FILE* file, char* filename, int field, char* result){
 
 void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type){
   char* field = argv[i+1];
-        float max;
+        float finalValue;
         /*
           If h is 0:
             If field == '0' or '-' or its the last value than look at first column
@@ -115,7 +115,7 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
           findField(file_contents(filename),argv[argc-1],0,label);
           printf("\tDefaultField\n");
           printf("\tLabel: %s\n",label);
-          max = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
+          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
           free(label);
         }
 
@@ -133,7 +133,7 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
 
 
           findField(file_contents(filename),argv[argc-1],lookUp,label);
-          max = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
+          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
 
           //Find the header given position and get the min
           printf("\tAtoiField\n");
@@ -145,14 +145,14 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
         else if (h == 1){
           //If h == 1 than use topic
           printf("\tHField\n");  
-          max = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type);
+          finalValue = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type);
           }
         else {
           //If none of the above, exit with error
           printf("Invalid Column Identifier\n");
           exit(EXIT_FAILURE);
         }
-      printf("%f\n", max);
+      printf("%f\n", finalValue);
 }
 
 //Gets the amount of Datapoints in the csv file
