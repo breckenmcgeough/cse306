@@ -86,7 +86,7 @@ void findField(FILE* file, char* filename, int field, char* result){
   char** tempList = (char**)malloc(sizeof(char*)*num_columns);
 
   for (int i = 0; i < num_columns; i++){
-    tempList[i] = (char*)malloc(sizeof(char)*100);
+    tempList[i] = (char*)malloc(sizeof(char)*50);
   }
   get_columns(file_contents(filename),filename,tempList);
   result = (char*)strcpy(result,tempList[field]);
@@ -111,7 +111,7 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
         //If h == 0 and the start of the argv starts with 0, -, or its the end of the file than it should be default value
         if (h == 0 && (field[0] == '0' || (field[0] == '-') || (i + 1 == argc - 1)) ) {
           //Find the header given position and get the min  
-          char* label = (char*)malloc(sizeof(char) * 100);
+          char* label = (char*)malloc(sizeof(char) * 50);
           findField(file_contents(filename),argv[argc-1],0,label);
           printf("\tDefaultField\n");
           printf("\tLabel: %s\n",label);
@@ -122,23 +122,32 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
         else if (h == 0 && atoi(argv[i+1]) != 0) {
           int lookUp = atoi(argv[i+1]);
           int datapoints = dash_f(input_file);
-          char* label = (char*)malloc(sizeof(char) * 100);
+          char* label = (char*)malloc(sizeof(char) * 50);
           //If inputted number is larger than amount of datapoints, exit with failure
           if (lookUp >= datapoints){
             printf("Invalid Column, Datapoints: %d, Entered: %d", datapoints - 1,lookUp);
             exit(EXIT_FAILURE);
           }
 
-
-
-
+          
           findField(file_contents(filename),argv[argc-1],lookUp,label);
-          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type,h);
+
+          //This if loop activates only for last value per line to remove the \n
+          if (lookUp == datapoints-1){
+            int i = 0;
+            int l = -1;
+            while (label[i] != '\0'){
+              i += 1;
+              l += 1;
+            }
+            label[l] = '\0';
+          }
 
           //Find the header given position and get the min
           printf("\tAtoiField\n");
           printf("\tAtoi: %d\n",lookUp);
           printf("\tLabel: %s\n",label);
+          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type,h);
 
           free(label);
         }
@@ -194,7 +203,7 @@ void get_columns(FILE* file, char* filename, char** columns_list){ //this functi
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
-  char* str = (char*)malloc(sizeof(char)*800);
+  char* str = (char*)malloc(sizeof(char)*500);
   fgets(str, 100, file);
   char* token = strtok(str, ",");
 
@@ -278,19 +287,19 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
 
   file = fopen(filename,"r"); //have to keep opening and closing the file since the other functions mess up the file by analyzing it
 
-  char* str = (char*)malloc(sizeof(char)*1000);
+  char* str = (char*)malloc(sizeof(char)*500);
   fgets(str, MAXCHAR, file); 
 
   char* field_invar = (char*)malloc(sizeof(char)*30);
   strcpy(field_invar, field); //copy the field into field_invar which is an invariant version of the field 
 
   //fgets(str, MAXCHAR, file);
-  if (h == 0){ //if no -h detected, then convert the numeric field into the corresponding column name. The numeric field can be used to index the columns_list to get the column name at that index
-    int pos = (int)atoi(field);
-    field_invar = realloc(field_invar, strlen(columns_list[pos])+1); //reallocate field_invar to size of column name at index
-    strcpy(field_invar, columns_list[pos]); //copy the column name at index into field_invar
-    //printf("%s passed \n", field);  
-  }
+  // if (h == 0){ //if no -h detected, then convert the numeric field into the corresponding column name. The numeric field can be used to index the columns_list to get the column name at that index
+  //   int pos = (int)atoi(field);
+  //   field_invar = realloc(field_invar, strlen(columns_list[pos])+1); //reallocate field_invar to size of column name at index
+  //   strcpy(field_invar, columns_list[pos]); //copy the column name at index into field_invar
+  //   //printf("%s passed \n", field);  
+  // }
 
   //char* token = strtok(str, ",");
   float min = (float)(1<<12); //just a massive value 
