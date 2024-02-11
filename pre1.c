@@ -8,7 +8,7 @@ int dash_f(FILE* file);
 int dash_r(FILE* file);
 void get_columns(FILE* file, char* filename, char** columns_list);
 char* get_column_value(char* field, char* str, char** columns_list);
-float dash_minmaxmean(FILE* file, char* field, char* filename, int type);
+float dash_minmaxmean(FILE* file, char* field, char* filename, int type,int h);
 void findField(FILE* file, char* filename, int field, char* result);
 void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type);
 
@@ -105,17 +105,17 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
           Otherwise:
             Exit with a failure
         */
-        printf("Type: %d\n",type);
+        printf("Type: %s\n",argv[i]);
         printf("\tH: %d\n",h);
         printf("\tField: %s\n",field);
         //If h == 0 and the start of the argv starts with 0, -, or its the end of the file than it should be default value
-        if (h == 0 && (field[0] == '0' || (field[0] == '-') && (i+1 < argc)) ) {
+        if (h == 0 && (field[0] == '0' || (field[0] == '-') || (i + 1 == argc - 1)) ) {
           //Find the header given position and get the min  
           char* label = (char*)malloc(sizeof(char) * 100);
           findField(file_contents(filename),argv[argc-1],0,label);
           printf("\tDefaultField\n");
           printf("\tLabel: %s\n",label);
-          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
+          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type,h);
           free(label);
         }
 
@@ -125,7 +125,7 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
           char* label = (char*)malloc(sizeof(char) * 100);
           //If inputted number is larger than amount of datapoints, exit with failure
           if (lookUp >= datapoints){
-            printf("Invalid Column, Datapoints: %d, Entered: %d", datapoints,lookUp);
+            printf("Invalid Column, Datapoints: %d, Entered: %d", datapoints - 1,lookUp);
             exit(EXIT_FAILURE);
           }
 
@@ -133,7 +133,7 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
 
 
           findField(file_contents(filename),argv[argc-1],lookUp,label);
-          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type);
+          finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type,h);
 
           //Find the header given position and get the min
           printf("\tAtoiField\n");
@@ -144,8 +144,13 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
         }
         else if (h == 1){
           //If h == 1 than use topic
+          if ((field[0] == '0' || (field[0] == '-') || (i + 1 == argc - 1))){
+            printf("Missing String Column Identifier\n");
+            exit(EXIT_FAILURE);
+          }
+
           printf("\tHField\n");  
-          finalValue = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type);
+          finalValue = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type,h);
           }
         else {
           //If none of the above, exit with error
@@ -185,33 +190,33 @@ int dash_r(FILE* file){
 Given the file, filename, and a place to place the result
 Put a matrix that contains the strings seperated by ',' inside of columns list
 */
-void get_columns(FILE* file, char* filename, char** columns_list){
+void get_columns(FILE* file, char* filename, char** columns_list){ //this function gets the column names and puts them in an array
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
-  //Copy the list
-  char* str = (char*)malloc(sizeof(char)*1000);
+  char* str = (char*)malloc(sizeof(char)*800);
   fgets(str, 100, file);
   char* token = strtok(str, ",");
+
+  //char** columns_list = (char**)malloc(sizeof(char*)*num_columns);
 
   for(int i = 0; i < num_columns; i++){
     strcpy(columns_list[i], token);
     token = strtok(NULL, ",");
   }
-
   free(str);
   fclose(file);
 }
 
 
-char* get_column_value(char* field, char* str, char** columns_list){
+char* get_column_value(char* field, char* str, char** columns_list){ //this function gets the value at a certain column given a row 
   int index = 0;
   int j = 0;
-  while (str[j] != '\n'){
-    if (strcmp(columns_list[index], field) == 0){
+  while (str[j] != '\n'){ //iterate through the row character by character
+    if (strcmp(columns_list[index], field) == 0){ //if the inputted field matches the column name at the 'index' index
       int k = j;
-      char* value = (char*)malloc(sizeof(char)*50);
-      while(str[k] != ','){
+      char* value = (char*)malloc(sizeof(char)*20);
+      while(str[k] != ','){ //iterate through chars until a comma is found and construct the string stored at that column in the row
         value[k-j] = str[k];
         k++;
       }
@@ -221,7 +226,7 @@ char* get_column_value(char* field, char* str, char** columns_list){
 
       return value;
 
-    }else{
+    }else{ //edge case to handle if the column name is the last column (Value) and the field wont match since Value is actually Value\n
       int m = 1;
       for (int o = 0; o < strlen(field); o++){
         if (field[o] != columns_list[index][o]){
@@ -230,7 +235,7 @@ char* get_column_value(char* field, char* str, char** columns_list){
       }
       if (m == 1){
         int k = j;
-        char* value = (char*)malloc(sizeof(char)*50);
+        char* value = (char*)malloc(sizeof(char)*30);
         while(str[k] != '\n'){
           value[k-j] = str[k];
           k++;
@@ -241,13 +246,13 @@ char* get_column_value(char* field, char* str, char** columns_list){
         return value;
       }
     }
-    if (str[j] == '\"'){
+    if (str[j] == '\"'){ //check if there is an open quote and iterate through chars to the next quote and disregard the string in between
       j++;
       while (str[j] != '\"'){
         j++;
       }
     }
-    if (str[j] == ','){
+    if (str[j] == ','){ //if a comma is found move to the next column
       index++;
     }
     j++;
@@ -255,31 +260,46 @@ char* get_column_value(char* field, char* str, char** columns_list){
   return NULL;
 }
 
-float dash_minmaxmean(FILE* file, char* field, char* filename, int type){
+void initialize_array(char** columns_list, int num_columns){
+  for (int i = 0; i < num_columns; i++){ //allocate memory for each column name (string) in the array of strings
+    columns_list[i] = (char*)malloc(sizeof(char)*50);
+  }
+}
+
+
+float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){ //return min or max or mean of a column
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
   char** columns_list = (char**)malloc(sizeof(char*)*num_columns);
-  for (int i = 0; i < num_columns; i++){
-    columns_list[i] = (char*)malloc(sizeof(char)*100);
+  initialize_array(columns_list, num_columns);
+
+  get_columns(file, filename, columns_list); //get the column names and put them in the array
+
+  file = fopen(filename,"r"); //have to keep opening and closing the file since the other functions mess up the file by analyzing it
+
+  char* str = (char*)malloc(sizeof(char)*1000);
+  fgets(str, MAXCHAR, file); 
+
+  char* field_invar = (char*)malloc(sizeof(char)*30);
+  strcpy(field_invar, field); //copy the field into field_invar which is an invariant version of the field 
+
+  //fgets(str, MAXCHAR, file);
+  if (h == 0){ //if no -h detected, then convert the numeric field into the corresponding column name. The numeric field can be used to index the columns_list to get the column name at that index
+    int pos = (int)atoi(field);
+    field_invar = realloc(field_invar, strlen(columns_list[pos])+1); //reallocate field_invar to size of column name at index
+    strcpy(field_invar, columns_list[pos]); //copy the column name at index into field_invar
+    //printf("%s passed \n", field);  
   }
 
-  get_columns(file, filename, columns_list);
-
-  file = fopen(filename,"r");
-
-  char* str = (char*)malloc(sizeof(char)*10000);
-  fgets(str, MAXCHAR, file); 
-  //fgets(str, MAXCHAR, file);
-
   //char* token = strtok(str, ",");
-  float min = (float)(1<<12);
+  float min = (float)(1<<12); //just a massive value 
   float max = -1;
   float sum = 0;
   float count = 0;
-  while(fgets(str, MAXCHAR, file) != NULL){
-    char* value = get_column_value(field, str, columns_list);
-    float num = atoi(value);
+  while(fgets(str, MAXCHAR, file) != NULL){ //iterate through the rows until none left
+    char* value = get_column_value(field_invar, str, columns_list); //get the value at the field (column) in the current row
+    float num = atof(value); //convert the string to a float
     if (num < min){
       min = num;
     }
@@ -288,31 +308,27 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type){
     }
     sum = sum + num;
     count++;
-    fgets(str, MAXCHAR, file);
+    fgets(str, MAXCHAR, file); //get next row
   }
   float mean = sum/count;
 
-
+  float return_val;
   if (type == 1){
-    return min;
+    return_val = min;
   }
   if (type == 2){
-    return max;
+    return_val = max;
   }
   if (type == 3){
-    return mean;
+    return_val = mean;
   }
   
   free(str);
+  for (int i = 0; i < num_columns; i++){
+    free(columns_list[i]);
+  }
   free(columns_list);
+  free(field_invar);
   fclose(file);
-  return 0;
+  return return_val;
 }
-
-
-
-
-
-
-
-
