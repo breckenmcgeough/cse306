@@ -203,7 +203,7 @@ void get_columns(FILE* file, char* filename, char** columns_list){ //this functi
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
-  char* str = (char*)malloc(sizeof(char)*500);
+  char* str = (char*)malloc(sizeof(char)*100);
   fgets(str, 100, file);
   char* token = strtok(str, ",");
 
