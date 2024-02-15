@@ -277,95 +277,7 @@ void initialize_array(char** columns_list, int num_columns){
   }
 }
 
-bool is_number(const char *str){
-  //printf("checking for numbers...\n");
-  int number = 0;
-  while (*str){
-    if (isdigit(*str) || *str == '.'){
-      number = 1;
-    }
-    str++;
-  }
-  if (number == 1) {
-    return true;
-    //printf("found numbers");
-  }else {
-    return false;
-    //printf("didn't find numbers");
-  }
-}
-
-bool check_column_for_numbers(FILE *file, char *field, char *filename, int h) {
-  char line[1024];
-  if (h==1) { //if -h used, compare field with the column name
-    fgets(line,sizeof(line),file);
-    char *token = strtok(line, ",");
-    int colindex = 0;
-    while (token != NULL) {
-      if (strcmp(field,token) == 0) {
-        while (fgets(line,sizeof(line),file)) {
-          char *values = strdup(line);
-          char *token = strtok(values,",");
-          int tokenindex = 0;
-          while (token != NULL) {
-            if (tokenindex == colindex) {
-              if (token != NULL && is_number(token)) {
-                free(values);
-                return true;
-              }
-              break;
-            }
-            token = strtok(NULL,",");
-            tokenindex++;
-          }
-          free(values);
-        }
-        return false;
-      }
-      token = strtok(NULL,",");
-      colindex++;
-    }
-    return false;
-  } else {
-    int col = atoi(field);
-    int current = 0;
-    fgets(line,sizeof(line),file);
-    char *token = strtok(line,",");
-    while (token != NULL) {
-      if (current == col) {
-        while (fgets(line,sizeof(line),file)) {
-          char *values = strdup(line);
-          char *token = strtok(values,",");
-          int tokenindex = 0;
-          while (token != NULL) {
-            if (tokenindex == col) {
-              if (token != NULL && is_number(token)) {
-                free(values);
-                return true;
-              }
-              break;
-            }
-            token = strtok(NULL,",");
-            tokenindex++;
-          }
-          free(values);
-        }
-        return false;
-      }
-      token = strtok(NULL,",");
-      current++;
-    }
-    return false;
-  }
-}
-
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){ //return min or max or mean of a column
-  // check that the column contains numerical data
-  if (!check_column_for_numbers(file,field,filename,h)){
-    printf("No numerical data was found in the column.");
-    exit(EXIT_FAILURE);
-  }
-  printf("found numbers");
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
@@ -395,9 +307,13 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
   float max = -1;
   float sum = 0;
   float count = 0;
+  int foundnumber = 0;
   while(fgets(str, MAXCHAR, file) != NULL){ //iterate through the rows until none left
     char* value = get_column_value(field_invar, str, columns_list); //get the value at the field (column) in the current row
     float num = atof(value); //convert the string to a float
+    if (num != 0.0) { // atof returns 0.0 if there is no valid conversion to make
+      foundnumber = 1; // set flag that a number was found in the column
+    }
     if (num < min){
       min = num;
     }
@@ -409,6 +325,11 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
     fgets(str, MAXCHAR, file); //get next row
   }
   float mean = sum/count;
+
+  if (foundnumber == 0){
+    printf("No numerical data was found.");
+    exit(EXIT_FAILURE);
+  }
 
   float return_val;
   if (type == 1){
