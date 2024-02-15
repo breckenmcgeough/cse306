@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <ctype.h>
 #define MAXCHAR sizeof(char)*1000
 
 FILE* file_contents(char* filename);
@@ -275,8 +277,95 @@ void initialize_array(char** columns_list, int num_columns){
   }
 }
 
+bool is_number(const char *str){
+  //printf("checking for numbers...\n");
+  int number = 0;
+  while (*str){
+    if (isdigit(*str) || *str == '.'){
+      number = 1;
+    }
+    str++;
+  }
+  if (number == 1) {
+    return true;
+    //printf("found numbers");
+  }else {
+    return false;
+    //printf("didn't find numbers");
+  }
+}
+
+bool check_column_for_numbers(FILE *file, char *field, char *filename, int h) {
+  char line[1024];
+  if (h==1) { //if -h used, compare field with the column name
+    fgets(line,sizeof(line),file);
+    char *token = strtok(line, ",");
+    int colindex = 0;
+    while (token != NULL) {
+      if (strcmp(field,token) == 0) {
+        while (fgets(line,sizeof(line),file)) {
+          char *values = strdup(line);
+          char *token = strtok(values,",");
+          int tokenindex = 0;
+          while (token != NULL) {
+            if (tokenindex == colindex) {
+              if (token != NULL && is_number(token)) {
+                free(values);
+                return true;
+              }
+              break;
+            }
+            token = strtok(NULL,",");
+            tokenindex++;
+          }
+          free(values);
+        }
+        return false;
+      }
+      token = strtok(NULL,",");
+      colindex++;
+    }
+    return false;
+  } else {
+    int col = atoi(field);
+    int current = 0;
+    fgets(line,sizeof(line),file);
+    char *token = strtok(line,",");
+    while (token != NULL) {
+      if (current == col) {
+        while (fgets(line,sizeof(line),file)) {
+          char *values = strdup(line);
+          char *token = strtok(values,",");
+          int tokenindex = 0;
+          while (token != NULL) {
+            if (tokenindex == col) {
+              if (token != NULL && is_number(token)) {
+                free(values);
+                return true;
+              }
+              break;
+            }
+            token = strtok(NULL,",");
+            tokenindex++;
+          }
+          free(values);
+        }
+        return false;
+      }
+      token = strtok(NULL,",");
+      current++;
+    }
+    return false;
+  }
+}
 
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){ //return min or max or mean of a column
+  // check that the column contains numerical data
+  if (!check_column_for_numbers(file,field,filename,h)){
+    printf("No numerical data was found in the column.");
+    exit(EXIT_FAILURE);
+  }
+  printf("found numbers");
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
 
