@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <ctype.h>
 #define MAXCHAR sizeof(char)*1000
 
 FILE* file_contents(char* filename);
@@ -275,7 +277,6 @@ void initialize_array(char** columns_list, int num_columns){
   }
 }
 
-
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){ //return min or max or mean of a column
   int num_columns = dash_f(file);
   file = fopen(filename,"r");
@@ -306,9 +307,13 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
   float max = -1;
   float sum = 0;
   float count = 0;
+  int foundnumber = 0;
   while(fgets(str, MAXCHAR, file) != NULL){ //iterate through the rows until none left
     char* value = get_column_value(field_invar, str, columns_list); //get the value at the field (column) in the current row
     float num = atof(value); //convert the string to a float
+    if (num != 0.0) { // atof returns 0.0 if there is no valid conversion to make
+      foundnumber = 1; // set flag that a number was found in the column
+    }
     if (num < min){
       min = num;
     }
@@ -320,6 +325,11 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
     fgets(str, MAXCHAR, file); //get next row
   }
   float mean = sum/count;
+
+  if (foundnumber == 0){
+    printf("No numerical data was found.");
+    exit(EXIT_FAILURE);
+  }
 
   float return_val;
   if (type == 1){
