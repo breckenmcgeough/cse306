@@ -144,7 +144,6 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
             }
             label[l] = '\0';
           }
-
           //Find the header given position and get the min
           printf("\tAtoiField\n");
           printf("\tAtoi: %d\n",lookUp);
@@ -303,8 +302,8 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
   // }
 
   //char* token = strtok(str, ",");
-  float min = (float)(1<<12); //just a massive value 
-  float max = -1;
+  float min = INT_MAX; //just a massive value 
+  float max = INT_MIN;
   float sum = 0;
   float count = 0;
   int foundnumber = 0;
