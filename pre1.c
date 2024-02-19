@@ -321,7 +321,6 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
     }
     sum = sum + num;
     count++;
-    fgets(str, MAXCHAR, file); //get next row
   }
   float mean = sum/count;
 
