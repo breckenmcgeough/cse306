@@ -126,7 +126,6 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
             exit(EXIT_FAILURE);
           }
 
-          
           findField(file_contents(filename),argv[argc-1],lookUp,label);
 
           //This if loop activates only for last value per line to remove the \n
@@ -312,7 +311,6 @@ float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){
     }
     sum = sum + num;
     count++;
-    fgets(str, MAXCHAR, file); //get next row
   }
   float mean = sum/count;
 
