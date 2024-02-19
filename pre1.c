@@ -107,16 +107,11 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
           Otherwise:
             Exit with a failure
         */
-        printf("Type: %s\n",argv[i]);
-        printf("\tH: %d\n",h);
-        printf("\tField: %s\n",field);
         //If h == 0 and the start of the argv starts with 0, -, or its the end of the file than it should be default value
         if (h == 0 && (field[0] == '0' || (field[0] == '-') || (i + 1 == argc - 1)) ) {
           //Find the header given position and get the min  
           char* label = (char*)malloc(sizeof(char) * 50);
           findField(file_contents(filename),argv[argc-1],0,label);
-          printf("\tDefaultField\n");
-          printf("\tLabel: %s\n",label);
           finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type,h);
           free(label);
         }
@@ -145,9 +140,6 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
             label[l] = '\0';
           }
           //Find the header given position and get the min
-          printf("\tAtoiField\n");
-          printf("\tAtoi: %d\n",lookUp);
-          printf("\tLabel: %s\n",label);
           finalValue = dash_minmaxmean(file_contents(filename), label, argv[argc-1],type,h);
 
           free(label);
@@ -159,7 +151,6 @@ void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int
             exit(EXIT_FAILURE);
           }
 
-          printf("\tHField\n");  
           finalValue = dash_minmaxmean(file_contents(filename), field, argv[argc-1],type,h);
           }
         else {
