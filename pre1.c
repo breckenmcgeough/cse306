@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <limits.h>
 #define MAXCHAR sizeof(char)*1000
 
 FILE* file_contents(char* filename);
@@ -13,6 +14,7 @@ char* get_column_value(char* field, char* str, char** columns_list);
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type,int h);
 void findField(FILE* file, char* filename, int field, char* result);
 void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type);
+void dash_records(FILE* file,char* filename, char* field, char* value, int h);
 
 
 int main(int argc, char* argv[]) {
@@ -35,7 +37,7 @@ int main(int argc, char* argv[]) {
       input_file = file_contents(argv[argc-1]);
 
       //If -r occurs and there is -h subtract by one otherwise print result
-      if (argv[i][0] == '-' && argv[i][1] == 'r'){ 
+      if (argv[i][0] == '-' && argv[i][1] == 'r'&& argv[i][2]!='e'){ 
         if (h == 1){
           printf("%d\n", dash_r(input_file)-1); 
         }else{
@@ -62,6 +64,11 @@ int main(int argc, char* argv[]) {
       //This obtains the mean value
       if (argv[i][0] == '-' && argv[i][1] == 'm'&& argv[i][2] == 'e'  && argv[i][3] == 'a' && argv[i][4] == 'n'){
         dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,3);
+      }
+
+      //This is for records value
+      if(argv[i][0]=='-' && argv[i][1]=='r'&&argv[i][2]=='e'&&argv[i][3]=='c'&&argv[i][4]=='o'&&argv[i][5]=='r'&&argv[i][6]=='d'&&argv[i][7]=='s'){
+        dash_h_determiner(input_file,argv[argc-1],argv,argc,i,h,4);
       }
     }
   }
@@ -98,6 +105,38 @@ void findField(FILE* file, char* filename, int field, char* result){
 void dash_h_determiner(FILE* input_file, char* filename,char** argv,int argc,int i,int h,int type){
   char* field = argv[i+1];
         float finalValue;
+
+        if(type ==4){
+          if (i+2 >= argc-1){
+            printf("Error");
+            exit(EXIT_FAILURE);
+          }
+          if( argv[i+1][0] == '-' || argv[i+2][0] == '-'){
+            printf("Error");
+            exit(EXIT_FAILURE);
+          }
+          if(h==0){
+            char* label = (char*)malloc(sizeof(char) * 50);
+            findField(file_contents(filename),argv[argc-1],atoi(argv[i+1]),label);
+            int lookUp = atoi(argv[i+1]);
+            int datapoints = dash_f(input_file);
+            if (lookUp == datapoints-1){
+              int i = 0;
+              int l = -1;
+              while (label[i] != '\0'){
+                i += 1;
+                l += 1;
+              }
+              label[l] = '\0';
+            }
+            dash_records(file_contents(filename),filename,label,argv[i+2],h);
+            free(label);
+
+          }else{
+            dash_records(file_contents(filename),filename,argv[i+1],argv[i+2],h);
+          }
+
+        }
         /*
           If h is 0:
             If field == '0' or '-' or its the last value than look at first column
@@ -265,6 +304,66 @@ void initialize_array(char** columns_list, int num_columns){
   for (int i = 0; i < num_columns; i++){ //allocate memory for each column name (string) in the array of strings
     columns_list[i] = (char*)malloc(sizeof(char)*50);
   }
+}
+
+void dash_records(FILE* file,char* filename, char* field, char* value, int h){//prints out the lines that contain a given value in a given field
+  int num_columns=dash_r(file);
+  int fieldIndex = -1;
+  file=fopen(filename,"r");
+  char* token=(char*)malloc(sizeof(char)*100);
+
+  char** columns_list = (char**)malloc(sizeof(char*)*num_columns);
+  initialize_array(columns_list, num_columns);
+
+  get_columns(file, filename, columns_list);// gets column names and put them in the array
+
+  char* str = (char*)malloc(sizeof(char)*1000);
+
+  fclose(file);
+  file=fopen(filename,"r");
+  fgets(str, MAXCHAR, file); 
+
+  while(fgets(str,MAXCHAR,file)!=NULL){
+     char* cvalue=get_column_value(field,str,columns_list);
+     //printf("%s\n",cvalue);
+     //printf("%s%s",field,field);
+     if(strncmp(cvalue,value,strlen(cvalue)-1)==0||strncmp(cvalue,value,strlen(value))==0){
+      
+       printf("%s",str);
+    }
+    free(cvalue);
+    //printf("%s\n",str);
+  }
+
+
+ /* int index = 0;
+  token=strtok(str," , ");
+  while (token!=NULL) {
+    if(token==field||strncat("\n")){
+      fieldIndex=index;
+    }
+      token = strtok(NULL, " , ");
+      index++;
+   }
+
+
+  while(fgets(str, MAXCHAR, file) != NULL){
+        int index = 0;
+        char* values[MAXCHAR]; // Array to hold values of one line
+        printf("%d",fieldIndex);
+        // Split the line into tokens
+        for(int i=0;i<=fieldIndex-1;i++){
+          token=strtok(str,",");
+          printf("%s",token);
+        }
+
+        if (strcmp(token,value)) {
+          int i=0;
+            //printf(); // Print the matching line
+        }
+  }*/
+  fclose(file);
+
 }
 
 float dash_minmaxmean(FILE* file, char* field, char* filename, int type, int h){ //return min or max or mean of a column

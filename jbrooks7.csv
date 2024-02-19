@@ -1,0 +1,7 @@
+﻿Date,UBIT,Duration,Activity & Tool Description
+2/8/2024,jbrooks7,40 minutes,Used vscode and created a separate branch for my work. Edited code to implement '-h' as an independent search before anything else is done
+2/8/2024,jbrooks7,45 minutes,Installed MinGW so I can use gcc to compile on my laptop and then tested the functionality of -r and -f with and without -h
+2/12/2024,jbrooks7,30 minutes,"Testing the current code on a number of different inputs to find bugs. Found one issue when using -min 0 -max 0 -mean 7, the max comes back as a very large number. Update: it was a memory issue with my computer"
+2/14/2024,jbrooks7,1 hour,"Trying to implement the exit failure on min, max, mean if no numbers are in the column"
+2/15/2024,jbrooks7,45 minutes,Tried more to do the exit failure using vscode. Spent a lot of time trying to fix it to work properly but still having issues.
+2/15/2024,jbrooks7,30 minutes,"Finally got the exit failure working for min, max, and mean when there is no numerical data in a column for both with and without -h options"

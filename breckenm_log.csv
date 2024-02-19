@@ -1,0 +1,5 @@
+﻿DATE,UBIT,DURATION,ACTIVITY & TOOL DESCRIPTION
+2/4/24,breckenm,2 hours,"Wrote code that implemented -r and -f functionality, started work on -h (functions created: file_contents,dash_f,dash_r,main)"
+2/4/24,breckenm,1 hour,Bug fixes and added comments to code to make more readable
+2/8/24,breckenm,4 hours 30 mins,"Wrote code that implemented -min, -max, and -mean and further worked on -h (functions created: get_columns,get_column_value,dash_minmaxmean,main)"
+2/8/24,breckenm,30 mins,Added comments to functions and code to make more readable

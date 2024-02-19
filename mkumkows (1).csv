@@ -1,0 +1,13 @@
+DATE,UBIT,DURATION,ACTIVITY & TOOL DESCRIPTION
+2/4/2024   ,mkumkows,  15 min ,  Group Meeting on Discord to Discuss Plan.
+2/4/2024   ,mkumkows,  1 min  ,  Downloaded the Git Repo and created a Separate branch off main named MaxField.
+2/7/2024   ,mkumkows,  40 min ,  Create Pseudocode and plan the solution to the -max field
+2/8/2024   ,mkumkows,  10 min ,  Created SkipLine function to Skip the remaining line in the csv file 
+2/8/2024   ,mkumkows,  2 Hours,  Worked on implementation of -max and struggled with determining if value was an integer when integer is 0
+2/8/2024   ,mkumkows,  30 min ,  Read and comprehended code of team mate that was required for my section in the separate branch "findingField".
+2/8/2024   ,mkumkows,  2 Hours,  Edited Team mates code for detection between -h and no -h
+2/8/2024   ,mkumkows,  20 min ,  Worked on making file more readable and pushed to git branch
+2/9/2024   ,mkumkows,  3 hours,  Completed code for -h detection and ensured that any combination of -max -min -mean works (Ex: -max 5 -min -mean 3 ./sample.csv)
+2/10/2024  ,mkumkows,  1 Hours,  Bugchecked between multiple -min -max -mean values with -h and without -h, corrected overflow issues, string format issues, contemplating creating make file
+2/15/2024  ,mkumkows,  30 min ,  Reviewed Teammates code who was stuck on returning an error on columns with no integers, and gave what I noticed wrong in their code and what could have been simplified through already written out functions.
+2/18/2024  ,mkumkows,  4 hours,  Attempted to do -records, strange bug
